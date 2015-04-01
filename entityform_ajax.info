@@ -1,0 +1,8 @@
+name = Entityform AJAX forms
+description = A little API for ajaxify Entityforms.
+core = 7.x
+package = Entityforms
+
+configure = admin/config/content/entityform-ajax
+
+dependencies[] = entityform

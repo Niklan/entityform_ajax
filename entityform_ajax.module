@@ -1,0 +1,165 @@
+<?php
+
+/**
+ * @file
+ * Main code.
+ *
+ * @author
+ * Name: Nikita Malyshev
+ * Web: http://niklan.net
+ * Email: hello@niklan.net
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function entityform_ajax_menu() {
+  $items['admin/config/content/entityform-ajax'] = array(
+    'title' => 'Entityform AJAX settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('entityform_ajax_settings_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+
+  $items['entityform_ajax/get'] = array(
+    'page callback' => 'entityform_ajax_get',
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+  );
+
+  $items['entityform_ajax/submit'] = array(
+    'page callback' => 'entityform_ajax_submit',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'delivery callback' => 'ajax_deliver',
+  );
+
+  return $items;
+}
+
+/**
+ * Module settings form.
+ */
+function entityform_ajax_settings_form() {
+  $entityform_types_objects = entityform_get_types();
+  $entityform_types = array();
+
+  foreach ($entityform_types_objects as $name => $form_info) {
+    $entityform_types[$name] = $form_info->label;
+  }
+
+  if (!empty($entityform_types)) {
+    $form['types'] = array(
+      '#type' => 'checkboxes',
+      '#options' => $entityform_types,
+      '#title' => t('Entityforms'),
+      '#description' => t('Select which entityform will be using AJAX.'),
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save')
+    );
+  }
+  else {
+    $form['no_forms'] = array(
+      '#markup' => t('You must have at least one entityform created.'),
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Submit handler for settings form.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function entityform_ajax_settings_form_submit(&$form, &$form_state) {
+  variable_set('entityform_ajax_list', $form_state['values']['types']);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function entityform_ajax_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['#entity_type']) && $form['#entity_type'] == 'entityform') {
+    $entityform_ajax_list = variable_get('entityform_ajax_list', array());
+
+    // If user check this form to ajax.
+    if ($entityform_ajax_list[$form['#bundle']]) {
+      $form['messages'] = array(
+        '#markup' => '<div id="' . $form_id . '-messages"></div>',
+        '#weight' => -99,
+      );
+
+      $form['actions']['submit']['#attributes']['class'][] = 'use-ajax-submit';
+
+      $form['actions']['submit']['#ajax'] = array(
+        'path' => 'entityform_ajax/submit',
+      );
+
+      $form['#action'] = '/entityform_ajax/submit';
+    }
+  }
+}
+
+/**
+ * AJAX form loading.
+ *
+ * @internal param $get_parameters
+ */
+function entityform_ajax_get() {
+  $form_id = $_GET['name'];
+
+  module_load_include('inc', 'entityform', 'entityform.admin');
+  $entityform_name = $form_id;
+  $entityform = entityform_form_wrapper(entityform_empty_load($entityform_name), 'submit', 'embedded');
+
+  drupal_add_library('system', 'jquery.form');
+  drupal_add_library('system', 'drupal.form');
+  drupal_add_library('system', 'drupal.ajax');
+  drupal_add_library('system', 'drupal.progress');
+
+  $html = '<html><head><title></title>' . drupal_get_js() . '</head><body class="entityform-ajax ajax-loaded">' . render($entityform) . '</body></html>';
+  print $html;
+  drupal_exit();
+}
+
+/**
+ * AJAX submit handler for entityform.
+ *
+ * @return array
+ */
+function entityform_ajax_submit() {
+  module_load_include('inc', 'entityform', 'entityform.admin');
+  list($form, $form_state) = ajax_get_form();
+  drupal_process_form($form['#form_id'], $form, $form_state);
+
+  $commands = array();
+  $commands[] = ajax_command_html('#' . $form['#form_id'] . '-messages', theme('status_messages'));
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Implements hook_js_alter().
+ */
+/*function entityform_ajax_js_alter(&$javascript) {
+  if (arg(0) == 'entityform_ajax' && arg(1) == 'get') {
+    $immortal_js = array(
+      '0',
+      'settings',
+      'misc/drupal.js',
+      'misc/ajax.js',
+      'misc/progress.js',
+    );
+
+    foreach ($javascript as $key => $script) {
+      if (!in_array($key, $immortal_js)) {
+        unset($javascript[$key]);
+      }
+    }
+  }
+}*/

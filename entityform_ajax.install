@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function entityform_ajax_uninstall() {
+  variable_del('entityform_ajax_list');
+}
