@@ -49,11 +49,21 @@ function entityform_ajax_settings_form() {
   }
 
   if (!empty($entityform_types)) {
+    $ajax_list = variable_get('entityform_ajax_list', array());
+    $types_default_values = array();
+
+    foreach ($ajax_list as $key => $list_item) {
+      if ($list_item == $key) {
+        $types_default_values[] = $key;
+      }
+    }
+
     $form['types'] = array(
       '#type' => 'checkboxes',
       '#options' => $entityform_types,
       '#title' => t('Entityforms'),
-      '#description' => t('Select which entityform will be using AJAX.'),
+      '#default_value' => $types_default_values,
+      '#description' => t('Select which entityform will be submited by AJAX.'),
     );
 
     $form['submit'] = array(
@@ -88,7 +98,7 @@ function entityform_ajax_form_alter(&$form, &$form_state, $form_id) {
     $entityform_ajax_list = variable_get('entityform_ajax_list', array());
 
     // If user check this form to ajax.
-    if ($entityform_ajax_list[$form['#bundle']]) {
+    if (isset($entityform_ajax_list[$form['#bundle']]) && $entityform_ajax_list[$form['#bundle']]) {
       $form['messages'] = array(
         '#markup' => '<div id="' . $form_id . '-messages"></div>',
         '#weight' => -99,
