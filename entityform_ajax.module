@@ -98,7 +98,10 @@ function entityform_ajax_form_alter(&$form, &$form_state, $form_id) {
     $entityform_ajax_list = variable_get('entityform_ajax_list', array());
 
     // If user check this form to ajax.
-    if (isset($entityform_ajax_list[$form['#bundle']]) && $entityform_ajax_list[$form['#bundle']]) {
+    if (isset($entityform_ajax_list[$form['#bundle']]) &&
+      $entityform_ajax_list[$form['#bundle']] &&
+      $form_id == $form['#bundle'] . '_entityform_edit_form'
+    ) {
       $form['messages'] = array(
         '#markup' => '<div id="' . $form_id . '-messages"></div>',
         '#weight' => -99,
@@ -113,7 +116,7 @@ function entityform_ajax_form_alter(&$form, &$form_state, $form_id) {
       $form['#action'] = '/entityform_ajax/submit';
     }
     else {
-      $form['#action'] = '/eform/submit/' . $form['#bundle'];
+      $form['#action'] = '/' . current_path();
     }
   }
 }
