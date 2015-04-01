@@ -146,20 +146,13 @@ function entityform_ajax_submit() {
 /**
  * Implements hook_js_alter().
  */
-/*function entityform_ajax_js_alter(&$javascript) {
+function entityform_ajax_js_alter(&$javascript) {
   if (arg(0) == 'entityform_ajax' && arg(1) == 'get') {
-    $immortal_js = array(
-      '0',
-      'settings',
-      'misc/drupal.js',
-      'misc/ajax.js',
-      'misc/progress.js',
-    );
-
+    // Disable all js except systems.
     foreach ($javascript as $key => $script) {
-      if (!in_array($key, $immortal_js)) {
+      if ($script['group'] != JS_LIBRARY) {
         unset($javascript[$key]);
       }
     }
   }
-}*/
+}

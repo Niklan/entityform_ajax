@@ -6,7 +6,7 @@ EneitytForm AJAX is a custom Drupal module that add a liitle API for easy to cre
 
 1.  Get a module.
 ```
-git clone ... efa
+git clone https://github.com/Niklan/Entityform-AJAX.git entityform_ajax
 ```
 2. Go to drupal 'Modules'.
 3. Enable it.
@@ -17,7 +17,7 @@ git clone ... efa
 #### AJAX form loading
 
 ~~~javascript
-$.get('/entityform_ajax', { form: 'callme' }).done(function(form) {
+$.get('/entityform_ajax/get', { name: 'callme' }).done(function(form) {
     // Do whatever you want.
 });
 ~~~
