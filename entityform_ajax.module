@@ -133,6 +133,14 @@ function entityform_ajax_get() {
   $entityform_name = $form_id;
   $entityform = entityform_form_wrapper(entityform_empty_load($entityform_name), 'submit', 'embedded');
 
+  if (!empty($_GET['callback'])) {
+    $callback = $_GET['callback'];
+
+    if (function_exists($callback)) {
+      $callback($entityform);
+    }
+  }
+
   drupal_add_library('system', 'jquery.form');
   drupal_add_library('system', 'drupal.form');
   drupal_add_library('system', 'drupal.ajax');
