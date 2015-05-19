@@ -53,7 +53,7 @@ function entityform_ajax_settings_form() {
     $types_default_values = array();
 
     foreach ($ajax_list as $key => $list_item) {
-      if ($list_item == $key) {
+      if ($list_item === $key) {
         $types_default_values[] = $key;
       }
     }
